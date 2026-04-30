@@ -447,9 +447,17 @@
         .then(() => {
             showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue);
         })
-        .catch(() => {
-            showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue); }
-        });
+       .catch(() => {
+    showResults(
+        email,
+        annualAdminCost,
+        lostDealsFromSlip,
+        lostRevenueFromSlip,
+        totalAnnualCost,
+        avgValue
+    );
+});
+}
     
 
         function showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue) {
