@@ -82,12 +82,29 @@
             font-family: inherit;
             font-size: 15px;
             color: #1E0E1C;
+            transition: border-color 0.2s;
         }
 
         input:focus, select:focus {
             outline: none;
             border-color: #6B2E60;
             background: #FAF7F9;
+        }
+
+        input.error, select.error {
+            border-color: #C4603A;
+            background: #FEF5F3;
+        }
+
+        .error-message {
+            color: #C4603A;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
         }
 
         .input-with-unit {
@@ -134,6 +151,25 @@
 
         .btn-primary:hover {
             background: #2C0D28;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 25, 66, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #A89AA5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #4A1942;
+            border: 2px solid #4A1942;
+        }
+
+        .btn-secondary:hover {
+            background: #FAF7F9;
+            transform: translateY(-2px);
         }
 
         .result {
@@ -187,6 +223,7 @@
             border-radius: 6px;
             margin: 30px 0;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(196, 96, 58, 0.2);
         }
 
         .total-cost h3 {
@@ -240,12 +277,14 @@
             padding: 20px;
             border-radius: 6px;
             border-left: 4px solid #6B2E60;
+            background: #F0E8EF;
         }
 
         .comparison-item h4 {
             font-weight: 700;
             margin-bottom: 10px;
             font-size: 16px;
+            color: #2C0D28;
         }
 
         .comparison-item ul {
@@ -257,12 +296,14 @@
             padding: 5px 0;
             font-size: 14px;
             line-height: 1.5;
+            color: #1E0E1C;
         }
 
         .comparison-item li:before {
             content: "→ ";
             font-weight: 600;
             color: #6B2E60;
+            margin-right: 8px;
         }
 
         .cta-box {
@@ -301,6 +342,71 @@
         .email-input-group button {
             flex: 0 0 150px;
         }
+
+        .status-message {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background: #E8F5E9;
+            color: #1B5E20;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .status-message.error {
+            background: #FFEBEE;
+            color: #B71C1C;
+            border-left: 4px solid #F44336;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .result-actions button {
+            flex: 0 1 200px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group, .result-actions {
+                flex-direction: column;
+            }
+
+            .email-input-group {
+                flex-direction: column;
+            }
+
+            .email-input-group button {
+                flex: 1;
+            }
+
+            .total-amount {
+                font-size: 36px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -312,78 +418,174 @@
 
         <div class="content">
             <div id="formSection" class="form-container">
-                <div class="form-group">
-                    <label for="role">What's your role?</label>
-                    <select id="role">
-                        <option value="">Select your role...</option>
-                        <option value="coach">Coach or Consultant</option>
-                        <option value="trainer">Trainer or Fitness Professional</option>
-                        <option value="freelancer">Freelancer or Agency Owner</option>
-                        <option value="ecom">E-Commerce or Product Creator</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="adminHours">How many hours per week on admin?</label>
-                    <div class="input-with-unit">
-                        <input type="number" id="adminHours" placeholder="e.g., 15" min="0">
-                        <div class="unit">hrs/week</div>
+                <form id="costForm">
+                    <div class="form-group">
+                        <label for="role">What's your role? <span style="color: #C4603A;">*</span></label>
+                        <select id="role" required aria-label="Select your role">
+                            <option value="">Select your role...</option>
+                            <option value="coach">Coach or Consultant</option>
+                            <option value="trainer">Trainer or Fitness Professional</option>
+                            <option value="freelancer">Freelancer or Agency Owner</option>
+                            <option value="ecom">E-Commerce or Product Creator</option>
+                        </select>
+                        <div class="error-message">Please select a role</div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="hourlyRate">What's your hourly rate?</label>
-                    <div class="input-with-unit">
-                        <input type="number" id="hourlyRate" placeholder="e.g., 150" min="0">
-                        <div class="unit">$/hr</div>
+                    <div class="form-group">
+                        <label for="adminHours">How many hours per week on admin? <span style="color: #C4603A;">*</span></label>
+                        <div class="input-with-unit">
+                            <input type="number" id="adminHours" placeholder="e.g., 15" min="0" max="168" required aria-label="Admin hours per week">
+                            <div class="unit">hrs/week</div>
+                        </div>
+                        <div class="error-message">Please enter hours (0-168)</div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="leadsPerMonth">How many leads/prospects per month?</label>
-                    <div class="input-with-unit">
-                        <input type="number" id="leadsPerMonth" placeholder="e.g., 10" min="0">
-                        <div class="unit">leads</div>
+                    <div class="form-group">
+                        <label for="hourlyRate">What's your hourly rate? <span style="color: #C4603A;">*</span></label>
+                        <div class="input-with-unit">
+                            <input type="number" id="hourlyRate" placeholder="e.g., 150" min="0" step="0.01" required aria-label="Hourly rate">
+                            <div class="unit">$/hr</div>
+                        </div>
+                        <div class="error-message">Please enter your hourly rate</div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="conversionRate">Conversion rate (%)?</label>
-                    <div class="input-with-unit">
-                        <input type="number" id="conversionRate" placeholder="e.g., 30" min="0" max="100">
-                        <div class="unit">%</div>
+                    <div class="form-group">
+                        <label for="leadsPerMonth">How many leads/prospects per month? <span style="color: #C4603A;">*</span></label>
+                        <div class="input-with-unit">
+                            <input type="number" id="leadsPerMonth" placeholder="e.g., 10" min="0" required aria-label="Leads per month">
+                            <div class="unit">leads</div>
+                        </div>
+                        <div class="error-message">Please enter leads per month</div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="avgValue">Average deal value?</label>
-                    <div class="input-with-unit">
-                        <input type="number" id="avgValue" placeholder="e.g., 2000" min="0">
-                        <div class="unit">$</div>
+                    <div class="form-group">
+                        <label for="conversionRate">Conversion rate (%)? <span style="color: #C4603A;">*</span></label>
+                        <div class="input-with-unit">
+                            <input type="number" id="conversionRate" placeholder="e.g., 30" min="0" max="100" required aria-label="Conversion rate percentage">
+                            <div class="unit">%</div>
+                        </div>
+                        <div class="error-message">Please enter conversion rate (0-100%)</div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label for="email">Your email</label>
-                    <input type="email" id="email" placeholder="you@email.com">
-                </div>
+                    <div class="form-group">
+                        <label for="avgValue">Average deal value? <span style="color: #C4603A;">*</span></label>
+                        <div class="input-with-unit">
+                            <input type="number" id="avgValue" placeholder="e.g., 2000" min="0" step="0.01" required aria-label="Average deal value">
+                            <div class="unit">$</div>
+                        </div>
+                        <div class="error-message">Please enter average deal value</div>
+                    </div>
 
-                <div class="button-group">
-                    <button class="btn-primary" onclick="calculateCost()">Calculate My Cost</button>
-                </div>
+                    <div class="form-group">
+                        <label for="email">Your email <span style="color: #C4603A;">*</span></label>
+                        <input type="email" id="email" placeholder="you@email.com" required aria-label="Your email address">
+                        <div class="error-message">Please enter a valid email</div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary">Calculate My Cost</button>
+                    </div>
+                </form>
             </div>
 
             <div id="resultSection" class="hidden">
+                <div class="status-message" id="statusMessage"></div>
                 <div class="result">
                     <h2>Here's What Your Systems Are Actually Costing You</h2>
                     <div id="resultContent"></div>
+                    <div class="result-actions">
+                        <button class="btn-secondary" onclick="resetCalculator()">← Calculate Again</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // Currency formatter
+        const currencyFormatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+
+        // Form validation
+        function validateForm() {
+            const fields = [
+                { id: 'role', type: 'required' },
+                { id: 'adminHours', type: 'number', min: 0, max: 168 },
+                { id: 'hourlyRate', type: 'number', min: 0 },
+                { id: 'leadsPerMonth', type: 'number', min: 0 },
+                { id: 'conversionRate', type: 'number', min: 0, max: 100 },
+                { id: 'avgValue', type: 'number', min: 0 },
+                { id: 'email', type: 'email' }
+            ];
+
+            let isValid = true;
+
+            fields.forEach(field => {
+                const input = document.getElementById(field.id);
+                const errorMsg = input.parentElement.parentElement.querySelector('.error-message') || 
+                                 input.nextElementSibling?.classList.contains('error-message') ? input.nextElementSibling : null;
+                const errorDiv = document.querySelector(`#${field.id}`).parentElement.parentElement.querySelector('.error-message');
+                
+                input.classList.remove('error');
+                if (errorDiv) errorDiv.classList.remove('show');
+
+                if (field.type === 'required') {
+                    if (!input.value) {
+                        input.classList.add('error');
+                        if (errorDiv) errorDiv.classList.add('show');
+                        isValid = false;
+                    }
+                } else if (field.type === 'number') {
+                    const value = parseFloat(input.value);
+                    if (!input.value || isNaN(value)) {
+                        input.classList.add('error');
+                        if (errorDiv) errorDiv.classList.add('show');
+                        isValid = false;
+                    } else if (field.min !== undefined && value < field.min) {
+                        input.classList.add('error');
+                        if (errorDiv) errorDiv.classList.add('show');
+                        isValid = false;
+                    } else if (field.max !== undefined && value > field.max) {
+                        input.classList.add('error');
+                        if (errorDiv) errorDiv.classList.add('show');
+                        isValid = false;
+                    }
+                } else if (field.type === 'email') {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(input.value)) {
+                        input.classList.add('error');
+                        if (errorDiv) errorDiv.classList.add('show');
+                        isValid = false;
+                    }
+                }
+            });
+
+            return isValid;
+        }
+
+        // Real-time validation
+        document.addEventListener('blur', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+                validateForm();
+            }
+        }, true);
+
+        // Form submission
+        document.getElementById('costForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateCost();
+        });
+
         function calculateCost() {
+            if (!validateForm()) {
+                showStatusMessage('Please fix the errors above', 'error');
+                return;
+            }
+
             const role = document.getElementById('role').value;
             const adminHours = parseFloat(document.getElementById('adminHours').value);
             const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
@@ -391,11 +593,6 @@
             const conversionRate = parseFloat(document.getElementById('conversionRate').value);
             const avgValue = parseFloat(document.getElementById('avgValue').value);
             const email = document.getElementById('email').value;
-
-            if (!role || !adminHours || !hourlyRate || !leadsPerMonth || !conversionRate || !avgValue || !email) {
-                alert('Please fill in all fields');
-                return;
-            }
 
             // Calculate costs
             const annualAdminCost = adminHours * 52 * hourlyRate;
@@ -410,55 +607,56 @@
             const totalAnnualCost = annualAdminCost + lostRevenueFromSlip;
 
             // Send to Formspree
-            const formData = {
-                email: email,
-                role: role,
-                adminHours: adminHours,
-                hourlyRate: hourlyRate,
-                leadsPerMonth: leadsPerMonth,
-                conversionRate: conversionRate,
-                avgValue: avgValue,
-                annualAdminCost: annualAdminCost,
-                lostRevenueFromSlip: lostRevenueFromSlip,
-                totalAnnualCost: totalAnnualCost
-            };
-
-            // Post to Formspree
             const formDataToSend = new FormData();
+            formDataToSend.append("email", email);
+            formDataToSend.append("role", role);
+            formDataToSend.append("adminHours", adminHours);
+            formDataToSend.append("hourlyRate", hourlyRate);
+            formDataToSend.append("leadsPerMonth", leadsPerMonth);
+            formDataToSend.append("conversionRate", conversionRate);
+            formDataToSend.append("avgValue", avgValue);
+            formDataToSend.append("annualAdminCost", annualAdminCost);
+            formDataToSend.append("lostRevenueFromSlip", lostRevenueFromSlip);
+            formDataToSend.append("totalAnnualCost", totalAnnualCost);
 
-        formDataToSend.append("email", email);
-        formDataToSend.append("role", role);
-        formDataToSend.append("adminHours", adminHours);
-        formDataToSend.append("hourlyRate", hourlyRate);
-        formDataToSend.append("leadsPerMonth", leadsPerMonth);
-        formDataToSend.append("conversionRate", conversionRate);
-        formDataToSend.append("avgValue", avgValue);
-        formDataToSend.append("annualAdminCost", annualAdminCost);
-        formDataToSend.append("lostRevenueFromSlip", lostRevenueFromSlip);
-        formDataToSend.append("totalAnnualCost", totalAnnualCost);
-        
-        fetch('https://formspree.io/f/mlgzrqrv', {
-            method: 'POST',
-            body: formDataToSend,
-            headers: {
-                'Accept': 'application/json'
-            }
-        })
-        .then(() => {
-            showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue);
-        })
-       .catch(() => {
-    showResults(
-        email,
-        annualAdminCost,
-        lostDealsFromSlip,
-        lostRevenueFromSlip,
-        totalAnnualCost,
-        avgValue
-    );
-});
-}
-    
+            // Disable submit button while sending
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Calculating...';
+
+            fetch('https://formspree.io/f/mlgzrqrv', {
+                method: 'POST',
+                body: formDataToSend,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Form submission failed');
+                }
+                showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue);
+                showStatusMessage('Calculation complete! Check your email for details.', 'success');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue);
+                showStatusMessage('Calculation saved locally. (Email service temporarily unavailable)', 'error');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Calculate My Cost';
+            });
+        }
+
+        function showStatusMessage(message, type) {
+            const statusMsg = document.getElementById('statusMessage');
+            statusMsg.textContent = message;
+            statusMsg.className = `status-message show ${type}`;
+            setTimeout(() => {
+                statusMsg.classList.remove('show');
+            }, 5000);
+        }
 
         function showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue) {
             document.getElementById('formSection').classList.add('hidden');
@@ -468,32 +666,32 @@
             resultContent.innerHTML = `
                 <div class="cost-card">
                     <h3>Time Spent on Admin</h3>
-                    <div class="cost-amount">$${annualAdminCost.toLocaleString('en-US', {maximumFractionDigits: 0})}</div>
+                    <div class="cost-amount">${currencyFormatter.format(annualAdminCost)}</div>
                     <div class="cost-description">per year</div>
                 </div>
 
                 <div class="cost-card">
                     <h3>Revenue Lost to Poor Follow-Up</h3>
-                    <div class="cost-amount">$${lostRevenueFromSlip.toLocaleString('en-US', {maximumFractionDigits: 0})}</div>
+                    <div class="cost-amount">${currencyFormatter.format(lostRevenueFromSlip)}</div>
                     <div class="cost-description">~${lostDealsFromSlip} deals slip per year</div>
                 </div>
 
                 <div class="total-cost">
                     <h3>Total Annual Cost</h3>
-                    <div class="total-amount">$${totalAnnualCost.toLocaleString('en-US', {maximumFractionDigits: 0})}</div>
-                    <div class="total-subtext">That's ${(totalAnnualCost / 12).toLocaleString('en-US', {maximumFractionDigits: 0})} per month</div>
+                    <div class="total-amount">${currencyFormatter.format(totalAnnualCost)}</div>
+                    <div class="total-subtext">That's ${currencyFormatter.format(totalAnnualCost / 12)} per month</div>
                 </div>
 
                 <div class="insights">
                     <h3>What This Means</h3>
                     <div class="insight-item">
-                        You're spending roughly <strong>${annualAdminCost.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong> per year on admin work that could be automated.
+                        You're spending roughly <strong>${currencyFormatter.format(annualAdminCost)}</strong> per year on admin work that could be automated.
                     </div>
                     <div class="insight-item">
-                        You're losing <strong>~${lostDealsFromSlip} deals per year</strong> because leads go cold without follow-up. That's <strong>$${lostRevenueFromSlip.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong> walking out the door.
+                        You're losing <strong>~${lostDealsFromSlip} deals per year</strong> because leads go cold without follow-up. That's <strong>${currencyFormatter.format(lostRevenueFromSlip)}</strong> in lost revenue.
                     </div>
                     <div class="insight-item">
-                        <strong>Combined:</strong> You're losing <strong>$${totalAnnualCost.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong> per year to broken systems.
+                        <strong>Combined:</strong> You're losing <strong>${currencyFormatter.format(totalAnnualCost)}</strong> per year to broken systems.
                     </div>
                 </div>
 
@@ -532,9 +730,22 @@
             window.scrollTo(0, 0);
         }
 
-            function bookAudit(email) {
+        function resetCalculator() {
+            document.getElementById('costForm').reset();
+            document.getElementById('formSection').classList.remove('hidden');
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('statusMessage').classList.remove('show');
+            
+            // Clear error states
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+            document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+            
+            window.scrollTo(0, 0);
+        }
+
+        function bookAudit(email) {
             window.location.href = 'https://calendar.app.google/jJ8PUp2sWyxwdFBx8';
-            }
+        }
     </script>
 </body>
 </html>
