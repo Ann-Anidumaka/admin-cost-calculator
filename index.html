@@ -1,171 +1,366 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Cost Calculator</title>
-
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-
-body {
-    font-family: Arial, sans-serif;
-    background:#2C0D28;
-    padding:20px;
-}
-
-.container {
-    max-width:800px;
-    margin:auto;
-    background:#fff;
-    padding:30px;
-    border-radius:8px;
-}
-
-input, select {
-    width:100%;
-    padding:10px;
-    margin-bottom:15px;
-}
-
-button {
-    padding:12px;
-    width:100%;
-    background:#4A1942;
-    color:#fff;
-    border:none;
-    cursor:pointer;
-}
-
-.hidden { display:none; }
-
-.cta-box {
-    margin-top:30px;
-    text-align:center;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<div id="formSection">
-    <h2>Admin Cost Calculator</h2>
-
-    <select id="role">
-        <option value="">Select role</option>
-        <option value="coach">Coach</option>
-        <option value="trainer">Trainer</option>
-        <option value="freelancer">Freelancer</option>
-        <option value="ecom">Ecom</option>
-    </select>
-
-    <input type="number" id="adminHours" placeholder="Admin hours/week">
-    <input type="number" id="hourlyRate" placeholder="Hourly rate">
-    <input type="number" id="leadsPerMonth" placeholder="Leads per month">
-    <input type="number" id="conversionRate" placeholder="Conversion rate %">
-    <input type="number" id="avgValue" placeholder="Average deal value">
-    <input type="email" id="email" placeholder="Your email">
-
-    <button id="calculateBtn">Calculate My Cost</button>
-</div>
-
-<div id="resultSection" class="hidden">
-    <div id="resultContent"></div>
-</div>
-
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const btn = document.getElementById("calculateBtn");
-
-    btn.addEventListener("click", calculateCost);
-
-    function calculateCost() {
-
-        const role = document.getElementById('role').value;
-        const adminHours = parseFloat(document.getElementById('adminHours').value);
-        const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
-        const leadsPerMonth = parseFloat(document.getElementById('leadsPerMonth').value);
-        const conversionRate = parseFloat(document.getElementById('conversionRate').value);
-        const avgValue = parseFloat(document.getElementById('avgValue').value);
-        const email = document.getElementById('email').value;
-
-        if (!role || !adminHours || !hourlyRate || !leadsPerMonth || !conversionRate || !avgValue || !email) {
-            alert("Please fill all fields");
-            return;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Cost Calculator - See What You're Losing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        const annualAdminCost = adminHours * 52 * hourlyRate;
-        const leadsPerYear = leadsPerMonth * 12;
-        const expectedConversions = leadsPerYear * (conversionRate / 100);
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #2C0D28;
+            color: #1E0E1C;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-        const lostDeals = Math.floor(expectedConversions * 0.2);
-        const lostRevenue = lostDeals * avgValue;
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #F9F0F7;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: -8px 8px #1A081A;
+        }
 
-        const totalCost = annualAdminCost + lostRevenue;
+        .header {
+            background: #2C0D28;
+            border-top: 8px solid #EDD9E8;
+            padding: 40px 30px;
+            text-align: center;
+        }
 
-        // ✅ SEND TO FORMSPREE
-        const formData = new FormData();
-        formData.append("email", email);
-        formData.append("role", role);
-        formData.append("adminHours", adminHours);
-        formData.append("hourlyRate", hourlyRate);
-        formData.append("leadsPerMonth", leadsPerMonth);
-        formData.append("conversionRate", conversionRate);
-        formData.append("avgValue", avgValue);
-        formData.append("annualAdminCost", annualAdminCost);
-        formData.append("lostRevenue", lostRevenue);
-        formData.append("totalCost", totalCost);
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 900;
+            color: #F9F0F7;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
 
-        fetch("https://formspree.io/f/mlgzrqrv", {
-            method: "POST",
-            body: formData,
-            headers: { "Accept": "application/json" }
-        })
-        .then(res => {
-            if (!res.ok) {
-                console.error("Formspree failed");
-            }
-        })
-        .catch(err => console.error(err));
+        .header p {
+            color: #EDD9E8;
+            font-size: 16px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
 
-        showResults(email, annualAdminCost, lostDeals, lostRevenue, totalCost);
+        .content {
+            padding: 40px 30px;
+        }
+
+        .form-container {
+            background: #FAF7F9;
+            padding: 30px;
+            border-radius: 6px;
+            border-left: 4px solid #6B2E60;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #1E0E1C;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #E8E2E7;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 15px;
+            color: #1E0E1C;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #6B2E60;
+            background: #FAF7F9;
+        }
+
+        .input-with-unit {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .input-with-unit input {
+            flex: 1;
+        }
+
+        .unit {
+            font-weight: 600;
+            color: #5A4F58;
+            padding-bottom: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #4A1942;
+            color: #F9F0F7;
+        }
+
+        .btn-primary:hover {
+            background: #2C0D28;
+        }
+
+        .result {
+            background: #FAF7F9;
+            padding: 40px;
+            border-radius: 6px;
+            border-left: 4px solid #C4603A;
+        }
+
+        .result h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: #2C0D28;
+            margin-bottom: 30px;
+        }
+
+        .cost-card {
+            background: #2C0D28;
+            color: #F9F0F7;
+            padding: 25px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-top: 6px solid #EDD9E8;
+        }
+
+        .cost-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .cost-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 900;
+            color: #EDD9E8;
+            margin-bottom: 5px;
+        }
+
+        .cost-description {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .total-cost {
+            background: #C4603A;
+            color: #F9F0F7;
+            padding: 30px;
+            border-radius: 6px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .total-cost h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            opacity: 0.95;
+        }
+
+        .total-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .total-subtext {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .insights {
+            background: #EDD9E8;
+            padding: 25px;
+            border-radius: 6px;
+            margin: 30px 0;
+        }
+
+        .insights h3 {
+            font-weight: 700;
+            color: #2C0D28;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .insight-item {
+            margin-bottom: 12px;
+            color: #1E0E1C;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .comparison-item {
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #6B2E60;
+        }
+
+        .comparison-item h4 {
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .comparison-item ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .comparison-item li {
+            padding: 5px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .comparison-item li:before {
+            content: "→ ";
+            font-weight: 600;
+            color: #6B2E60;
+        }
+
+        .cta-box {
+            background: #2C0D28;
+            color: #F9F0F7;
+            padding: 30px;
+            border-radius: 6px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .cta-box h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .cta-box p {
+            margin-bottom: 20px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .email-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .email-input-group input {
+            flex: 1;
+            background: #F9F0F7;
+            color: #1E0E1C;
+        }
+
+        .email-input-group button {
+            flex: 0 0 150px;
+        }
+    </style>
+</head>
+<body>
+...
+<!-- EVERYTHING ABOVE REMAINS THE SAME -->
+<script>
+function calculateCost() {
+    const role = document.getElementById('role').value;
+    const adminHours = parseFloat(document.getElementById('adminHours').value);
+    const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+    const leadsPerMonth = parseFloat(document.getElementById('leadsPerMonth').value);
+    const conversionRate = parseFloat(document.getElementById('conversionRate').value);
+    const avgValue = parseFloat(document.getElementById('avgValue').value);
+    const email = document.getElementById('email').value;
+
+    if (!role || !adminHours || !hourlyRate || !leadsPerMonth || !conversionRate || !avgValue || !email) {
+        alert('Please fill in all fields');
+        return;
     }
 
-    function showResults(email, adminCost, lostDeals, lostRevenue, totalCost) {
+    const annualAdminCost = adminHours * 52 * hourlyRate;
+    const leadsPerYear = leadsPerMonth * 12;
+    const expectedConversions = leadsPerYear * (conversionRate / 100);
 
-        document.getElementById("formSection").classList.add("hidden");
-        document.getElementById("resultSection").classList.remove("hidden");
+    const slipRate = 0.20;
+    const lostDealsFromSlip = Math.floor(expectedConversions * slipRate);
+    const lostRevenueFromSlip = lostDealsFromSlip * avgValue;
 
-        document.getElementById("resultContent").innerHTML = `
-            <h2>Your Results</h2>
+    const totalAnnualCost = annualAdminCost + lostRevenueFromSlip;
 
-            <p>Admin Cost: <strong>$${adminCost.toLocaleString()}</strong></p>
-            <p>Lost Deals: <strong>${lostDeals}</strong></p>
-            <p>Lost Revenue: <strong>$${lostRevenue.toLocaleString()}</strong></p>
-            <p>Total Cost: <strong>$${totalCost.toLocaleString()}</strong></p>
+    // ✅ FIXED FORMSPREE
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("role", role);
+    formData.append("adminHours", adminHours);
+    formData.append("hourlyRate", hourlyRate);
+    formData.append("leadsPerMonth", leadsPerMonth);
+    formData.append("conversionRate", conversionRate);
+    formData.append("avgValue", avgValue);
+    formData.append("annualAdminCost", annualAdminCost);
+    formData.append("lostRevenueFromSlip", lostRevenueFromSlip);
+    formData.append("totalAnnualCost", totalAnnualCost);
 
-            <div class="cta-box">
-                <h3>Fix This Now</h3>
+    fetch('https://formspree.io/f/mlgzrqrv', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(() => {
+        showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue);
+    })
+    .catch(() => {
+        showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue);
+    });
+}
 
-                <!-- ✅ RELIABLE BUTTON -->
-                <a href="https://calendar.app.google/jJ8PUp2sWyxwdFBx8" 
-                   target="_blank"
-                   style="display:inline-block; padding:12px 20px; background:#4A1942; color:#fff; text-decoration:none;">
-                   👉 Book Audit Now
-                </a>
-
-                <p style="margin-top:10px;">Opens your calendar</p>
-            </div>
-        `;
-    }
-
-});
+function bookAudit(email) {
+    // ✅ FIXED CALENDAR (NO POPUP BLOCKING)
+    window.location.href = 'https://calendar.app.google/jJ8PUp2sWyxwdFBx8';
+}
 </script>
-
 </body>
 </html>
