@@ -565,10 +565,8 @@
                 alert('Please enter your email');
                 return;
             }
-            alert(`Thanks! Check your email at ${email}. Calendar link coming within 24 hours.`);
-            console.log('Audit request:', {
-                email: email,
-                timestamp: new Date().toISOString()
+            // Redirect to your Google Calendar
+            window.location.href = 'https://calendar.app.google/jJ8PUp2sWyxwdFBx8?email=' + encodeURIComponent(email);
             });
         }
     </script>
