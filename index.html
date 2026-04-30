@@ -303,7 +303,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="header">
@@ -313,7 +312,6 @@
 
         <div class="content">
             <div id="formSection" class="form-container">
-
                 <div class="form-group">
                     <label for="role">What's your role?</label>
                     <select id="role">
@@ -384,61 +382,151 @@
         </div>
     </div>
 
-<script>
-function calculateCost() {
+    <script>
+        function calculateCost() {
+            const role = document.getElementById('role').value;
+            const adminHours = parseFloat(document.getElementById('adminHours').value);
+            const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
+            const leadsPerMonth = parseFloat(document.getElementById('leadsPerMonth').value);
+            const conversionRate = parseFloat(document.getElementById('conversionRate').value);
+            const avgValue = parseFloat(document.getElementById('avgValue').value);
+            const email = document.getElementById('email').value;
 
-    const role = document.getElementById('role').value;
-    const adminHours = parseFloat(document.getElementById('adminHours').value);
-    const hourlyRate = parseFloat(document.getElementById('hourlyRate').value);
-    const leadsPerMonth = parseFloat(document.getElementById('leadsPerMonth').value);
-    const conversionRate = parseFloat(document.getElementById('conversionRate').value);
-    const avgValue = parseFloat(document.getElementById('avgValue').value);
-    const email = document.getElementById('email').value;
+            if (!role || !adminHours || !hourlyRate || !leadsPerMonth || !conversionRate || !avgValue || !email) {
+                alert('Please fill in all fields');
+                return;
+            }
 
-    if (!role || !adminHours || !hourlyRate || !leadsPerMonth || !conversionRate || !avgValue || !email) {
-        alert('Please fill in all fields');
-        return;
-    }
+            // Calculate costs
+            const annualAdminCost = adminHours * 52 * hourlyRate;
+            const leadsPerYear = leadsPerMonth * 12;
+            const expectedConversions = leadsPerYear * (conversionRate / 100);
+            
+            // Estimate lost conversions (20% slip due to poor follow-up)
+            const slipRate = 0.20;
+            const lostDealsFromSlip = Math.floor(expectedConversions * slipRate);
+            const lostRevenueFromSlip = lostDealsFromSlip * avgValue;
+            
+            const totalAnnualCost = annualAdminCost + lostRevenueFromSlip;
 
-    const annualAdminCost = adminHours * 52 * hourlyRate;
-    const leadsPerYear = leadsPerMonth * 12;
-    const expectedConversions = leadsPerYear * (conversionRate / 100);
+            // Send to Formspree
+            const formData = {
+                email: email,
+                role: role,
+                adminHours: adminHours,
+                hourlyRate: hourlyRate,
+                leadsPerMonth: leadsPerMonth,
+                conversionRate: conversionRate,
+                avgValue: avgValue,
+                annualAdminCost: annualAdminCost,
+                lostRevenueFromSlip: lostRevenueFromSlip,
+                totalAnnualCost: totalAnnualCost
+            };
 
-    const slipRate = 0.20;
-    const lostDealsFromSlip = Math.floor(expectedConversions * slipRate);
-    const lostRevenueFromSlip = lostDealsFromSlip * avgValue;
+            // Post to Formspree
+            const formDataToSend = new FormData();
 
-    const totalAnnualCost = annualAdminCost + lostRevenueFromSlip;
+        formDataToSend.append("email", email);
+        formDataToSend.append("role", role);
+        formDataToSend.append("adminHours", adminHours);
+        formDataToSend.append("hourlyRate", hourlyRate);
+        formDataToSend.append("leadsPerMonth", leadsPerMonth);
+        formDataToSend.append("conversionRate", conversionRate);
+        formDataToSend.append("avgValue", avgValue);
+        formDataToSend.append("annualAdminCost", annualAdminCost);
+        formDataToSend.append("lostRevenueFromSlip", lostRevenueFromSlip);
+        formDataToSend.append("totalAnnualCost", totalAnnualCost);
+        
+        fetch('https://formspree.io/f/mlgzrqrv', {
+            method: 'POST',
+            body: formDataToSend,
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(() => {
+            showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue);
+        })
+        .catch(() => {
+            showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue);
+        });
+    
 
-    // ✅ FIXED FORMSPREE ONLY
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("role", role);
-    formData.append("adminHours", adminHours);
-    formData.append("hourlyRate", hourlyRate);
-    formData.append("leadsPerMonth", leadsPerMonth);
-    formData.append("conversionRate", conversionRate);
-    formData.append("avgValue", avgValue);
-    formData.append("annualAdminCost", annualAdminCost);
-    formData.append("lostRevenueFromSlip", lostRevenueFromSlip);
-    formData.append("totalAnnualCost", totalAnnualCost);
+        function showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue) {
+            document.getElementById('formSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+            
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = `
+                <div class="cost-card">
+                    <h3>Time Spent on Admin</h3>
+                    <div class="cost-amount">$${annualAdminCost.toLocaleString('en-US', {maximumFractionDigits: 0})}</div>
+                    <div class="cost-description">per year</div>
+                </div>
 
-    fetch('https://formspree.io/f/mlgzrqrv', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'Accept': 'application/json'
+                <div class="cost-card">
+                    <h3>Revenue Lost to Poor Follow-Up</h3>
+                    <div class="cost-amount">$${lostRevenueFromSlip.toLocaleString('en-US', {maximumFractionDigits: 0})}</div>
+                    <div class="cost-description">~${lostDealsFromSlip} deals slip per year</div>
+                </div>
+
+                <div class="total-cost">
+                    <h3>Total Annual Cost</h3>
+                    <div class="total-amount">$${totalAnnualCost.toLocaleString('en-US', {maximumFractionDigits: 0})}</div>
+                    <div class="total-subtext">That's ${(totalAnnualCost / 12).toLocaleString('en-US', {maximumFractionDigits: 0})} per month</div>
+                </div>
+
+                <div class="insights">
+                    <h3>What This Means</h3>
+                    <div class="insight-item">
+                        You're spending roughly <strong>${annualAdminCost.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong> per year on admin work that could be automated.
+                    </div>
+                    <div class="insight-item">
+                        You're losing <strong>~${lostDealsFromSlip} deals per year</strong> because leads go cold without follow-up. That's <strong>$${lostRevenueFromSlip.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong> walking out the door.
+                    </div>
+                    <div class="insight-item">
+                        <strong>Combined:</strong> You're losing <strong>$${totalAnnualCost.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong> per year to broken systems.
+                    </div>
+                </div>
+
+                <div class="comparison">
+                    <div class="comparison-item">
+                        <h4>What You're Doing Now</h4>
+                        <ul>
+                            <li>Tracking across multiple tools</li>
+                            <li>Remembering who to follow up with</li>
+                            <li>Losing leads to silence</li>
+                            <li>Constantly stressed</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-item">
+                        <h4>With A Working System</h4>
+                        <ul>
+                            <li>Everything in one place</li>
+                            <li>Automatic follow-up reminders</li>
+                            <li>Nothing slips through</li>
+                            <li>Actually have time to work</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="cta-box">
+                    <h3>Let's Fix This</h3>
+                    <p>A 30-minute audit ($200) shows you exactly what's broken and what a working system looks like.</p>
+                    <div class="email-input-group">
+                        <input type="email" value="${email}" disabled style="background: #FAF7F9; color: #5A4F58;">
+                        <button class="btn-primary" onclick="bookAudit('${email}')">Book Audit Now</button>
+                    </div>
+                    <p style="font-size: 12px; opacity: 0.8;">You'll see my calendar in a new tab</p>
+                </div>
+            `;
+
+            window.scrollTo(0, 0);
         }
-    });
 
-    showResults(email, annualAdminCost, lostDealsFromSlip, lostRevenueFromSlip, totalAnnualCost, avgValue);
-}
-
-function bookAudit(email) {
-    // ✅ FIXED CALENDAR (RELIABLE)
-    window.location.href = 'https://calendar.app.google/jJ8PUp2sWyxwdFBx8';
-}
-</script>
-
+            function bookAudit(email) {
+            window.location.href = 'https://calendar.app.google/jJ8PUp2sWyxwdFBx8';
+            }
+    </script>
 </body>
 </html>
