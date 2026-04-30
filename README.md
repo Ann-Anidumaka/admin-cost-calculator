@@ -1,5 +1,5 @@
 # admin-cost-calculator
-Interactive calculator showing coaches, trainers, and freelancers exactly how much their broken systems cost annually. Calculates admin time + lost revenue from poor follow-up. Lead magnet that converts to $200 audits → $2-5K implementation projects. Built for solopreneurs losing $50K+ yearly to operational chaos.
+Interactive calculator showing coaches, trainers, and freelancers exactly how much their broken systems cost annually. Calculates admin time + lost revenue from poor follow-up. Lead magnet that converts to $100 audits → $2-5K implementation projects. Built for solopreneurs losing $50K+ yearly to operational chaos.
 
 
 # Admin Cost Calculator
@@ -20,7 +20,7 @@ An interactive calculator that shows:
 1. Open `index.html` in a browser (or access via GitHub Pages link)
 2. Answer 6 simple questions about your business
 3. Get your personalized cost breakdown
-4. Book a $200 audit to fix it
+4. Book a $100 audit to fix it
 
 ## The Math
 
